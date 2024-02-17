@@ -6,6 +6,7 @@ class Book():
     isbn: str
     title: str
     author: str
+    image_url: str = None
 
 
 if __name__ == '__main__':
