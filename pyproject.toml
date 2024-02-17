@@ -1,0 +1,21 @@
+[project]
+name = "bookimager"
+version = "0.1.0"
+description = "Default template for PDM package"
+authors = [
+    {name = "ReRubis", email = "slesarenkod@gmail.com"},
+]
+dependencies = [
+    "pyyaml>=6.0.1",
+]
+requires-python = ">=3.12"
+readme = "README.md"
+license = {text = "MIT"}
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+
+[tool.pdm]
+distribution = true
