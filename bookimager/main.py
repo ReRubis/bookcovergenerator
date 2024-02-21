@@ -1,7 +1,7 @@
 import asyncio
 from bookimager.config import CONFIG
 from bookimager.models.book import Book
-from bookimager.service.dalleinteg import DALLERequest
+from bookimager.service.imagegener import DALLERequest
 from bookimager.service.drawer import Drawer
 from bookimager.service.service import MainService
 

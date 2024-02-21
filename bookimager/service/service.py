@@ -1,5 +1,5 @@
 from bookimager.models.book import Book
-from bookimager.service.dalleinteg import DALLERequest
+from bookimager.service.imagegener import DALLERequest
 from bookimager.service.drawer import Drawer
 import os
 
