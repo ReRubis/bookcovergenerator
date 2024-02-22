@@ -10,4 +10,4 @@ def setup_logging(name: str) -> None:
 setup_logging(__package__)
 
 
-del setup_logging,
+del setup_logging

@@ -78,6 +78,9 @@ class DALLERequest():
                 data=json.dumps(data)
             ) as response:
                 response_data = await response.json()
+
+                if response_data.get('error'):
+                    raise ValueError(response_data['error'])
                 return response_data['data'][0]['url']
 
 

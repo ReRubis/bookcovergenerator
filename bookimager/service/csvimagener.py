@@ -1,10 +1,11 @@
 import csv
 from bookimager.models.book import CsvBookRequest
-from bookimager.service.imagegener import ImageGeneratorProtocol, DALLERequest
+from bookimager.service.gener_integration import (
+    ImageGeneratorProtocol,
+    DALLERequest,
+)
 import asyncio
-import aiohttp
-import aiofiles
-import uuid
+
 import time
 import logging
 
@@ -16,7 +17,7 @@ logger = logging.getLogger(__name__)
 SEMAPHORE_LIMIT = 4
 
 
-class CsvImageDownloader():
+class CsvImageGenerator():
     """
     - Read the csv file
     - Handle the image generation
@@ -57,7 +58,7 @@ class CsvImageDownloader():
         logger.info('Starting to request images from csv')
 
         tasks = [
-            asyncio.create_task(self.request_image(book))
+            asyncio.create_task(self._request_image(book))
             for book in data for _ in range(int(book.number))
         ]
         results = await asyncio.gather(*tasks)
@@ -66,7 +67,7 @@ class CsvImageDownloader():
 
         return results
 
-    async def request_image(self, row: CsvBookRequest) -> CsvBookRequest:
+    async def _request_image(self, row: CsvBookRequest) -> CsvBookRequest:
         """Requests an image from the image generator.
         """
 
@@ -87,27 +88,6 @@ class CsvImageDownloader():
 
         return row
 
-    async def download_images(self):
-        """Uses the csv data to download images.
-        """
-        logger.info('')
-        for row in self.csv_data:
-            if not row.image_url:
-                raise ValueError('Image URL not found')
-
-            for link in row.image_url:
-                await self.download_image(row)
-
-    async def download_image(self, row: CsvBookRequest):
-        """Downloads the image from the URL and saves it to the file system."""
-        async with aiohttp.ClientSession() as session:
-            async with session.get(row.image_url) as response:
-                async with aiofiles.open(f'generated_images/{self.csv_path[:-4:]}/{row.isbn}/{uuid.uuid4()}.png', 'wb') as file:
-                    await file.write(await response.read())
-
-    async def slam_text():
-        ...
-
     async def _remove_duplicates(self, results: list[CsvBookRequest]):
         """Removes duplicates"""
 
@@ -125,7 +105,7 @@ class CsvImageDownloader():
 if __name__ == '__main__':
 
     generator = DALLERequest()
-    csv_downloader = CsvImageDownloader(
+    csv_downloader = CsvImageGenerator(
         generator,
         'test.csv'
     )

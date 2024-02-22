@@ -1,8 +1,11 @@
 import subprocess
 import requests
-from bookimager.models.book import Book
-import time
+from bookimager.models.book import Book, CsvBookRequest
 import os
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 class Drawer():
@@ -12,14 +15,24 @@ class Drawer():
     def __init__(self):
         return None
 
-    def _draw_book(self,  book: Book) -> None:
+    def _draw_book(
+            self,
+            book: Book,
+            file_path: str = None
+    ) -> None:
         """Edits the svg file to include the book's title and author"""
         with open('template.svg', 'r') as f:
             template = f.read()
 
-        template = template.replace(
-            'ISBN', f'"./generated_images/{book.isbn}.png"'
-        )
+        if file_path:
+            template = template.replace(
+                'ISBN', f'"{file_path}"'
+            )
+        else:
+            template = template.replace(
+                'ISBN', f'"./generated_images/{book.isbn}.png"'
+            )
+
         template = template.replace('TITLE', book.title)
         template = template.replace('AUTHOR', book.author)
 
@@ -30,15 +43,24 @@ class Drawer():
         self,
         book: Book,
         svg_template: str = 'template.svg',
+        save_path: str = './redacted_images',
+        save_name: str = None
     ) -> None:
         """
         Converts the input file to a png file
         """
+        path = f'--export-png={save_path}/{book.isbn}.png'
+
+        if save_name:
+            path = f'--export-png={save_path}/{save_name}'
+
+        os.makedirs(save_path, exist_ok=True)
+
         subprocess.run([
             'inkscape',
             '-z',
             svg_template,
-            f'--export-png=./redacted_images/{book.isbn}.png'
+            path
         ])
 
     def _restore_template(
@@ -51,7 +73,7 @@ class Drawer():
             f.write(
                 '<svg width="1024" height="1024" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">'
                 '<image xlink:href=ISBN x="0" y="0" width="1024" height="1024"/>'
-                '<rect x="112" y="700" width="800" height="250" fill="black" fill-opacity="0.45"/>'
+                '<rect x="112" y="700" width="800" height="250" fill="black" fill-opacity="0.70"/>'
                 '<text x="512" y="900" font-family="Arial" font-size="70" fill="white" text-anchor="middle">AUTHOR</text>'
                 '<text x="512" y="800" font-family="Arial" font-size="70" fill="white" text-anchor="middle">TITLE</text>'
                 '</svg>'
@@ -75,9 +97,42 @@ class Drawer():
         self._download_image(book)
         self._draw_book(book)
         self._convert_to_png(book)
-        time.sleep(1)
         os.remove(f'./generated_images/{book.isbn}.png')
         self._restore_template(input_file)
+
+    def construct_scv_png(
+        self,
+        books: list[CsvBookRequest],
+        csv_folder: str,
+        input_file: str = 'template.svg',
+    ) -> None:
+        """Constructs a png file from the input file"""
+
+        logger.info(
+            f'Starting to draw titles on covers in folder {csv_folder}')
+
+        for book in books:
+            folder = f'./generated_images/{csv_folder}/{book.isbn}'
+            list_of_files = []
+            for filename in os.listdir(folder):
+                file_path = os.path.join(folder, filename)
+                if os.path.isfile(file_path):
+                    list_of_files.append(file_path)
+
+            for file in list_of_files:
+                self._draw_book(
+                    book,
+                    file_path=file
+                )
+                self._convert_to_png(
+                    book,
+                    input_file,
+                    f'./redacted_images/{csv_folder}/{book.isbn}',
+                    os.path.basename(file)
+                )
+
+                # os.remove(f'./generated_images/{csv_folder}/{book.isbn}/{file}')
+                self._restore_template(input_file)
 
 
 if __name__ == '__main__':
