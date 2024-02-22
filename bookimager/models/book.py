@@ -16,6 +16,7 @@ class CsvBookRequest():
     author: str
     prompt: str
     number: str
+    image_url: list[str] = None
 
 
 if __name__ == '__main__':

@@ -4,6 +4,9 @@ from typing import Protocol, Literal
 import json
 import aiohttp
 import asyncio
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class ImageGeneratorProtocol(Protocol):
@@ -66,13 +69,16 @@ class DALLERequest():
         }
 
         async with aiohttp.ClientSession() as session:
+
+            logger.info("Requesting image from DALL-E")
+
             async with session.post(
                 url,
                 headers=headers,
                 data=json.dumps(data)
             ) as response:
                 response_data = await response.json()
-                return response_data
+                return response_data['data'][0]['url']
 
 
 if __name__ == "__main__":
