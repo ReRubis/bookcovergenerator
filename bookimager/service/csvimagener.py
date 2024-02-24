@@ -115,16 +115,11 @@ if __name__ == '__main__':
         results = await csv_downloader.handle_image_generation(data)
         print(results)
 
-        # Save resutls to new csv
         with open('new_test.csv', 'w') as file:
             writer = csv.DictWriter(
                 file, fieldnames=results[0].__dict__.keys())
             writer.writeheader()
             for row in results:
                 writer.writerow(row.__dict__)
-
-        # csv_downloader.request_images()
-        # csv_downloader.download_images()
-        # csv_downloader.slam_text()
 
     asyncio.run(main())

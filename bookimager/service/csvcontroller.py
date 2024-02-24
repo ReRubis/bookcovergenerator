@@ -73,6 +73,8 @@ if __name__ == "__main__":
         data = await controller.handle_image_generation()
         await controller.handle_image_download(data)
 
+        print(data)
+
         controller.draw_titles_on_images(
             data,
             csv_path

@@ -5,6 +5,8 @@ from bookimager.service.gener_integration import DALLERequest
 from bookimager.service.drawer import Drawer
 from bookimager.service.service import MainService
 
+import os
+
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -32,6 +34,29 @@ class MyCog(commands.Cog):
         No idea.
         """
         ...
+
+    @parent_command.command(name="list_generated_csvs")
+    async def list_scvs(self, ctx: commands.Context) -> None:
+        """
+        List the generated csvs
+        """
+        scvs = os.listdir('./generated_csvs')
+        await ctx.send(scvs)
+
+    @parent_command.command(name="start_showcase")
+    async def start_showcase(
+        self,
+        ctx: commands.Context,
+        csv_name: str,
+    ) -> None:
+        """
+        Start the showcase
+        """
+        if not os.path.exists(f'./generated_csvs/{csv_name}'):
+            await ctx.send("The csv does not exist")
+            return
+
+        await ctx.send("Starting the showcase")
 
     @parent_command.command(name="cover")
     async def sub_command(

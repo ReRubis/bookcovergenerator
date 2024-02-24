@@ -18,23 +18,44 @@ class Drawer():
     def _draw_book(
             self,
             book: Book,
-            file_path: str = None
+            file_path: str,
     ) -> None:
-        """Edits the svg file to include the book's title and author"""
+        """Edits the svg file to include the book's title and author.
+        """
+
         with open('template.svg', 'r') as f:
             template = f.read()
 
-        if file_path:
-            template = template.replace(
-                'ISBN', f'"{file_path}"'
-            )
-        else:
-            template = template.replace(
-                'ISBN', f'"./generated_images/{book.isbn}.png"'
-            )
+        template = template.replace(
+            'PATH', f'"{file_path}"'
+        )
 
-        template = template.replace('TITLE', book.title)
-        template = template.replace('AUTHOR', book.author)
+        title_length = len(book.title)
+
+        match title_length:
+
+            case _ if 20 > title_length:
+                template = template.replace('FONT_SIZE_TITLE', '"60"')
+                template = template.replace('FONT_SIZE_AUTHOR', '"55"')
+
+            case _ if 30 > title_length > 20:
+                template = template.replace('FONT_SIZE_TITLE', '"50"')
+                template = template.replace('FONT_SIZE_AUTHOR', '"45"')
+
+            case _ if 40 > title_length > 30:
+                template = template.replace('FONT_SIZE_TITLE', '"40"')
+                template = template.replace('FONT_SIZE_AUTHOR', '"35"')
+
+            case _ if 50 > title_length > 40:
+                template = template.replace('FONT_SIZE_TITLE', '"30"')
+                template = template.replace('FONT_SIZE_AUTHOR', '"25"')
+
+            case _ if title_length > 50:
+                template = template.replace('FONT_SIZE_TITLE', '"20"')
+                template = template.replace('FONT_SIZE_AUTHOR', '"15"')
+
+        template = template.replace('TITLE', book.title.upper())
+        template = template.replace('AUTHOR', book.author.upper())
 
         with open('template.svg', 'w') as f:
             f.write(template)
@@ -72,10 +93,10 @@ class Drawer():
         with open(input_file, 'w') as f:
             f.write(
                 '<svg width="1024" height="1024" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">'
-                '<image xlink:href=ISBN x="0" y="0" width="1024" height="1024"/>'
-                '<rect x="112" y="700" width="800" height="250" fill="black" fill-opacity="0.70"/>'
-                '<text x="512" y="900" font-family="Arial" font-size="70" fill="white" text-anchor="middle">AUTHOR</text>'
-                '<text x="512" y="800" font-family="Arial" font-size="70" fill="white" text-anchor="middle">TITLE</text>'
+                '<image xlink:href=PATH x="0" y="0" width="1024" height="1024"/>'
+                '<rect x="112" y="700" width="800" height="250" fill="black" fill-opacity="0.85"/>'
+                '<text x="512" y="900" font-family="League Spartan" font-weight="bold" font-size=FONT_SIZE_AUTHOR fill="white" text-anchor="middle">AUTHOR</text>'
+                '<text x="512" y="800" font-family="League Spartan" font-weight="bold" font-size=FONT_SIZE_TITLE fill="white" text-anchor="middle">TITLE</text>'
                 '</svg>'
             )
 
@@ -95,7 +116,10 @@ class Drawer():
     ) -> None:
         """Constructs a png file from the input file"""
         self._download_image(book)
-        self._draw_book(book)
+        self._draw_book(
+            book,
+            f"./generated_images/{book.isbn}.png"
+        )
         self._convert_to_png(book)
         os.remove(f'./generated_images/{book.isbn}.png')
         self._restore_template(input_file)
