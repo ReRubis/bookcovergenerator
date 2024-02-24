@@ -107,7 +107,7 @@ class MyCog(commands.Cog):
         await ctx.defer()
 
         try:
-            service.generate_image(book, prompt)
+            await service.generate_image(book, prompt)
         except Exception as e:
             print(e)
             await ctx.send("An error occurred while generating the cover.")

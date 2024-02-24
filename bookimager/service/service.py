@@ -13,7 +13,7 @@ class MainService():
         self.dalle = generator
         self.drawer = drawer
 
-    def generate_image(self, book: Book, prompt: str) -> None:
+    async def generate_image(self, book: Book, prompt: str) -> None:
         """Generate an image for a book.
 
         args:
@@ -22,7 +22,7 @@ class MainService():
         returns:
             str: The URL of the generated image.
         """
-        image_url = self.dalle.generate_image(
+        image_url = await self.dalle.generate_image(
             f"NO TEXT, NO SYMBOLS {prompt}"
         )
 
