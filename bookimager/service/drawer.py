@@ -155,7 +155,9 @@ class Drawer():
                     os.path.basename(file)
                 )
 
-                # os.remove(f'./generated_images/{csv_folder}/{book.isbn}/{file}')
+                os.remove(
+                    f'{file}'
+                )
                 self._restore_template(input_file)
 
 

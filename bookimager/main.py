@@ -4,14 +4,16 @@ from bookimager.models.book import Book
 from bookimager.service.gener_integration import DALLERequest
 from bookimager.service.drawer import Drawer
 from bookimager.service.service import MainService
+from bookimager.discord_func.view_gen import create_view
 
 import os
 
 import discord
-from discord import app_commands
 from discord.ext import commands
+from discord.interactions import Interaction
 
-intents = discord.Intents.default()
+
+intents = discord.Intents.all()
 intents.members = True
 intents.message_content = True
 
@@ -28,20 +30,23 @@ class MyCog(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot: commands.Bot = bot
 
-    @commands.hybrid_group(name="get")
+    @commands.hybrid_group(name="bookimager")
     async def parent_command(self, ctx: commands.Context) -> None:
         """
         No idea.
         """
         ...
 
-    @parent_command.command(name="list_generated_csvs")
+    @parent_command.command(name="list_finished_csvs")
     async def list_scvs(self, ctx: commands.Context) -> None:
         """
         List the generated csvs
         """
-        scvs = os.listdir('./generated_csvs')
-        await ctx.send(scvs)
+        files = os.listdir('./redacted_images')
+        directories = [f for f in files if os.path.isdir(
+            f'./redacted_images/{f}'
+        )]
+        await ctx.send(directories)
 
     @parent_command.command(name="start_showcase")
     async def start_showcase(
@@ -52,11 +57,29 @@ class MyCog(commands.Cog):
         """
         Start the showcase
         """
-        if not os.path.exists(f'./generated_csvs/{csv_name}'):
+
+        isbns_count = 0
+
+        if not os.path.exists(f'./redacted_images/{csv_name}'):
             await ctx.send("The csv does not exist")
             return
 
-        await ctx.send("Starting the showcase")
+        view, files_list = create_view(
+            csv_name,
+            isbns_count
+        )
+
+        try:
+            await ctx.send(
+                f"Starting the showcase for {csv_name}",
+                files=[
+                    *files_list
+                ],
+                view=view
+
+            )
+        except Exception as e:
+            print(e)
 
     @parent_command.command(name="cover")
     async def sub_command(
@@ -96,8 +119,22 @@ class MyCog(commands.Cog):
         )
 
 
+@bot.command()
+async def test_wqqwrqwrtest(interaction: Interaction) -> None:
+    await interaction.response.send_message(
+        "This is a test",
+        ephemeral=True
+    )
+
+
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(MyCog(bot))
+
+
+@bot.event
+async def on_button_click(interaction: Interaction) -> None:
+    """Handles button clicks
+    """
 
 
 # @bot.event
@@ -115,4 +152,5 @@ async def main():
 
 
 if __name__ == '__main__':
+
     asyncio.run(main())
