@@ -48,6 +48,17 @@ class CsvController:
             name
         )
 
+    async def run_generation(
+        self,
+        csv_path: str
+    ) -> None:
+        data = await self.handle_image_generation()
+        await self.handle_image_download(data)
+        self.draw_titles_on_images(
+            data,
+            csv_path
+        )
+
 
 if __name__ == "__main__":
 
