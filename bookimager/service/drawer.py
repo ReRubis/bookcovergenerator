@@ -95,8 +95,8 @@ class Drawer():
                 '<svg width="1024" height="1024" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">'
                 '<image xlink:href=PATH x="0" y="0" width="1024" height="1024"/>'
                 '<rect x="112" y="700" width="800" height="250" fill="black" fill-opacity="0.85"/>'
-                '<text x="512" y="900" font-family="League Spartan" font-weight="bold" font-size=FONT_SIZE_AUTHOR fill="white" text-anchor="middle">AUTHOR</text>'
-                '<text x="512" y="800" font-family="League Spartan" font-weight="bold" font-size=FONT_SIZE_TITLE fill="white" text-anchor="middle">TITLE</text>'
+                '<text x="512" y="900" font-family="League Spartan" font-weight="bold" textLength="700" font-size=FONT_SIZE_AUTHOR fill="white" text-anchor="middle">AUTHOR</text>'
+                '<text x="512" y="800" font-family="League Spartan" font-weight="bold" textLength="700" font-size=FONT_SIZE_TITLE fill="white" text-anchor="middle">TITLE</text>'
                 '</svg>'
             )
 
@@ -164,10 +164,10 @@ class Drawer():
 if __name__ == '__main__':
     book = Book(
         '978-3-16-148410-0',
-        'The Catcher in the Rye',
+        'The Catcher in the Rye The Catcher in the Rye  The Catcher in the Rye ',
         'J.D. Salinger',
         'https://covers.openlibrary.org/b/id/554615-L.jpg'
     )
     drawer = Drawer()
-    # drawer.construct_png(book)
+    drawer.construct_png(book)
     drawer._restore_template()
