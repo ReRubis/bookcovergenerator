@@ -1,6 +1,6 @@
 from bookimager.models.book import Book
 from bookimager.service.gener_integration import DALLERequest
-from bookimager.service.drawer import Drawer
+from bookimager.service.drawertwo import Drawer
 import os
 
 
@@ -23,7 +23,8 @@ class MainService():
             str: The URL of the generated image.
         """
         image_url = await self.dalle.generate_image(
-            f"NO TEXT, NO SYMBOLS {prompt}"
+            f"NO TEXT, NO SYMBOLS {prompt}",
+            'dall-e-3'
         )
 
         new_book = Book(

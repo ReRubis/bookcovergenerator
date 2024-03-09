@@ -3,7 +3,7 @@ import requests
 from bookimager.models.book import Book, CsvBookRequest
 import os
 import logging
-
+import imgkit
 
 logger = logging.getLogger(__name__)
 
@@ -20,14 +20,14 @@ class Drawer():
             book: Book,
             file_path: str,
     ) -> None:
-        """Edits the svg file to include the book's title and author.
+        """Edits the html file to include the book's title and author.
         """
 
-        with open('template.svg', 'r') as f:
+        with open('template.html', 'r') as f:
             template = f.read()
 
         template = template.replace(
-            'PATH', f'"{file_path}"'
+            '"PATH"', f'"{file_path}"'
         )
 
         title_length = len(book.title)
@@ -35,71 +35,68 @@ class Drawer():
         match title_length:
 
             case _ if 20 > title_length:
-                template = template.replace('FONT_SIZE_TITLE', '"60"')
-                template = template.replace('FONT_SIZE_AUTHOR', '"55"')
+                template = template.replace('TITLE_FONT_SIZE', '50px')
+                template = template.replace('AUTHOR_FONT_SIZE', '50px')
 
             case _ if 30 > title_length > 20:
-                template = template.replace('FONT_SIZE_TITLE', '"50"')
-                template = template.replace('FONT_SIZE_AUTHOR', '"45"')
+                template = template.replace('TITLE_FONT_SIZE', '45px')
+                template = template.replace('AUTHOR_FONT_SIZE', '40px')
 
             case _ if 40 > title_length > 30:
-                template = template.replace('FONT_SIZE_TITLE', '"40"')
-                template = template.replace('FONT_SIZE_AUTHOR', '"35"')
+                template = template.replace('TITLE_FONT_SIZE', '35px')
+                template = template.replace('AUTHOR_FONT_SIZE', '30px')
 
             case _ if 50 > title_length > 40:
-                template = template.replace('FONT_SIZE_TITLE', '"30"')
-                template = template.replace('FONT_SIZE_AUTHOR', '"25"')
+                template = template.replace('TITLE_FONT_SIZE', '25px')
+                template = template.replace('AUTHOR_FONT_SIZE', '20px')
 
             case _ if title_length > 50:
-                template = template.replace('FONT_SIZE_TITLE', '"20"')
-                template = template.replace('FONT_SIZE_AUTHOR', '"15"')
+                template = template.replace('TITLE_FONT_SIZE', '20px')
+                template = template.replace('AUTHOR_FONT_SIZE', '15px')
 
         template = template.replace('TITLE', book.title.upper())
         template = template.replace('AUTHOR', book.author.upper())
 
-        with open('template.svg', 'w') as f:
+        with open('template.html', 'w') as f:
             f.write(template)
 
     def _convert_to_png(
         self,
         book: Book,
-        svg_template: str = 'template.svg',
+        html_template: str = 'template.html',
         save_path: str = './redacted_images',
         save_name: str = None
     ) -> None:
         """
         Converts the input file to a png file
         """
-        path = f'--export-png={save_path}/{book.isbn}.png'
+        path = f'{save_path}/{book.isbn}.png'
 
         if save_name:
-            path = f'--export-png={save_path}/{save_name}'
+            path = f'{save_path}/{save_name}'
 
         os.makedirs(save_path, exist_ok=True)
 
-        subprocess.run([
-            'inkscape',
-            '-z',
-            svg_template,
-            path
-        ])
+        imgkit.from_file(
+                html_template,
+                path,
+                options = {
+                'enable-local-file-access': None
+            }
+        )
+
+
 
     def _restore_template(
         self,
-        input_file: str = 'template.svg'
+        input_file: str = 'template.html'
     ) -> None:
         """Restores the template file to its original state
         """
         with open(input_file, 'w') as f:
-            f.write(
-                '<svg width="1024" height="1024" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">'
-                '<image xlink:href=PATH x="0" y="0" width="1024" height="1024"/>'
-                '<rect x="112" y="700" width="800" height="250" fill="black" fill-opacity="0.85"/>'
-                '<text x="512" y="900" font-family="League Spartan" font-weight="bold" textLength="700" font-size=FONT_SIZE_AUTHOR fill="white" text-anchor="middle">AUTHOR</text>'
-                '<text x="512" y="800" font-family="League Spartan" font-weight="bold" textLength="700" font-size=FONT_SIZE_TITLE fill="white" text-anchor="middle">TITLE</text>'
-                '</svg>'
-            )
-
+            with open('base_template.html', 'r') as base:
+                f.write(base.read())
+           
     def _download_image(
         self,
         book: Book,
@@ -112,7 +109,7 @@ class Drawer():
     def construct_png(
         self,
         book: Book,
-        input_file: str = 'template.svg',
+        input_file: str = 'template.html',
     ) -> None:
         """Constructs a png file from the input file"""
         self._download_image(book)
@@ -121,14 +118,14 @@ class Drawer():
             f"./generated_images/{book.isbn}.png"
         )
         self._convert_to_png(book)
-        os.remove(f'./generated_images/{book.isbn}.png')
+        # os.remove(f'./generated_images/{book.isbn}.png')
         self._restore_template(input_file)
 
     def construct_scv_png(
         self,
         books: list[CsvBookRequest],
         csv_folder: str,
-        input_file: str = 'template.svg',
+        input_file: str = 'template.html',
     ) -> None:
         """Constructs a png file from the input file"""
 
@@ -155,16 +152,16 @@ class Drawer():
                     os.path.basename(file)
                 )
 
-                os.remove(
-                    f'{file}'
-                )
+                # os.remove(
+                #     f'{file}'
+                # )
                 self._restore_template(input_file)
 
 
 if __name__ == '__main__':
     book = Book(
         '978-3-16-148410-0',
-        'The Catcher in the Rye The Catcher in the Rye  The Catcher in the Rye ',
+        'The Catcher in the Rye The Catcher in the Rye  The Catcher in the Rye The Catcher in the Rye The Catcher in the Rye  The Catcher in the Rye The Catcher in the Rye The Catcher in the Rye  The Catcher in the Rye',
         'J.D. Salinger',
         'https://covers.openlibrary.org/b/id/554615-L.jpg'
     )
