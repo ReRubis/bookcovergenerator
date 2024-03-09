@@ -2,7 +2,7 @@ import asyncio
 from bookimager.config import CONFIG
 from bookimager.models.book import Book
 from bookimager.service.gener_integration import DALLERequest
-from bookimager.service.drawer import Drawer
+from bookimager.service.drawertwo import Drawer
 from bookimager.service.service import MainService
 from bookimager.service.imagedown import ImageDownloader
 from bookimager.service.csvimagener import CsvImageGenerator
